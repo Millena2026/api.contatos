@@ -1,50 +1,26 @@
 package com.example.api.contatos.controller;
 
 import com.example.api.contatos.model.Contato;
+import com.example.api.contatos.ContatoRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
+@CrossOrigin(origins = "*") // <- ESSA LINHA SALVA A GENTE
 @RestController
 @RequestMapping("/contatos")
 public class ContatoController {
 
-    private List<Contato> contatos = new ArrayList<>();
-    private AtomicLong contador = new AtomicLong();
+    @Autowired
+    private ContatoRepository repository;
 
-    // GET - Listar todos
     @GetMapping
     public List<Contato> listar() {
-        return contatos;
+        return repository.findAll();
     }
 
-    // POST - Criar novo
     @PostMapping
-    public Contato criar(@RequestBody Contato contato) {
-        contato.setId(contador.incrementAndGet());
-        contatos.add(contato);
-        return contato;
-    }
-
-    // PUT - Atualizar
-    @PutMapping("/{id}")
-    public Contato atualizar(@PathVariable Long id, @RequestBody Contato contatoAtualizado) {
-        for (Contato c : contatos) {
-            if (c.getId().equals(id)) {
-                c.setNome(contatoAtualizado.getNome());
-                c.setTelefone(contatoAtualizado.getTelefone());
-                c.setEmail(contatoAtualizado.getEmail());
-                return c;
-            }
-        }
-        return null;
-    }
-
-    // DELETE - Deletar
-    @DeleteMapping("/{id}")
-    public String deletar(@PathVariable Long id) {
-        contatos.removeIf(c -> c.getId().equals(id));
-        return "Contato deletado com sucesso!";
+    public Contato adicionar(@RequestBody Contato contato) {
+        return repository.save(contato);
     }
 }
