@@ -1,68 +1,78 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Minha Agenda</title>
+    <title>API Contatos</title>
     <style>
-        body { font-family: Arial; padding: 20px; background: #f0f0f0; }
-        h1 { color: #333; }
-        input, button { padding: 10px; margin: 5px; border-radius: 5px; border: 1px solid #ccc; }
-        button { background: #4CAF50; color: white; cursor: pointer; }
-        button:hover { background: #45a049; }
-        .contato { background: white; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        body { font-family: Arial; padding: 20px; max-width: 500px; margin: auto; }
+        input, button { display: block; width: 100%; margin: 10px 0; padding: 10px; }
+        button { background: #4CAF50; color: white; border: none; cursor: pointer; }
+        li { margin: 5px 0; }
     </style>
 </head>
 <body>
-    <h1>📒 Minha Agenda</h1>
 
-    <h3>Adicionar Contato</h3>
+    <h1>API Contatos</h1>
+
     <input type="text" id="nome" placeholder="Nome">
     <input type="text" id="telefone" placeholder="Telefone">
-    <input type="text" id="email" placeholder="Email">
+    <input type="email" id="email" placeholder="Email">
     <button onclick="adicionarContato()">Adicionar</button>
 
     <h3>Contatos</h3>
-    <div id="lista"></div>
+    <ul id="lista"></ul>
 
-    <script>
-        const apiUrl = "http://localhost:8080/contatos";
+<script>
+const API_URL = "https://api-contatos-fu37.onrender.com/contatos";
 
-        window.onload = listarContatos;
+// Carrega os contatos quando abre a página
+window.onload = listarContatos;
 
-        function listarContatos() {
-            fetch(apiUrl)
-                .then(res => res.json())
-                .then(data => {
-                    let html = "";
-                    data.forEach(c => {
-                        html += `<div class="contato">
-                            <b>${c.nome}</b><br>
-                            📞 ${c.telefone}<br>
-                            ✉️ ${c.email}
-                        </div>`;
-                    });
-                    document.getElementById("lista").innerHTML = html;
-                });
-            }
+async function listarContatos() {
+    try {
+        const resposta = await fetch(API_URL);
+        const contatos = await resposta.json();
+        const lista = document.getElementById('lista');
+        lista.innerHTML = '';
+        contatos.forEach(c => {
+            lista.innerHTML += `<li>${c.nome} - ${c.telefone} - ${c.email}</li>`;
+        });
+    } catch (erro) {
+        console.error("Erro ao listar:", erro);
+    }
+}
 
-        function adicionarContato() {
-            const contato = {
-                nome: document.getElementById("nome").value,
-                telefone: document.getElementById("telefone").value,
-                email: document.getElementById("email").value
-            };
+async function adicionarContato() {
+    const contato = {
+        nome: document.getElementById('nome').value,
+        telefone: document.getElementById('telefone').value,
+        email: document.getElementById('email').value
+    };
 
-            fetch(apiUrl, {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify(contato)
-            }).then(() => {
-                document.getElementById("nome").value = "";
-                document.getElementById("telefone").value = "";
-                document.getElementById("email").value = "";
-                listarContatos();
-            });
+    try {
+        const resposta = await fetch(API_URL, {
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(contato)
+        });
+
+        if(resposta.ok){
+            alert('Contato adicionado com sucesso!');
+            // Limpa os campos
+            document.getElementById("nome").value = "";
+            document.getElementById("telefone").value = "";
+            document.getElementById("email").value = "";
+            // Atualiza a lista
+            listarContatos();
+        } else {
+            alert('Erro ao adicionar contato');
         }
-    </script>
+    } catch (erro) {
+        console.error("Erro ao adicionar:", erro);
+        alert('Erro de conexão com a API');
+    }
+}
+</script>
+
 </body>
 </html>
